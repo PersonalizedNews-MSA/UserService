@@ -80,7 +80,10 @@ pipeline {
 
         stage('Build & Test') {
             steps {
-                sh './gradlew clean build --no-daemon'
+                sh '''
+                    export GRADLE_OPTS="-Xmx1024m -Xms512m -Dfile.encoding=UTF-8"
+                    ./gradlew clean build --no-daemon --stacktrace
+                '''
             }
         }
 
