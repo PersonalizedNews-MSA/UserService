@@ -86,7 +86,7 @@ pipeline {
         stage('Build & Test Application') {
             steps {
                 script {
-                    def gradleCmd = 'gradle clean build'
+                    def gradleCmd = './gradle clean build'
                     if (!params.TAG.startsWith('origin') && !params.TAG.endsWith('/main')) {
                         gradleCmd = 'gradle --no-daemon clean build'
                     }
