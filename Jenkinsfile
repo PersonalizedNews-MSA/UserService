@@ -60,13 +60,11 @@ pipeline {
                             returnStdout: true
                     ).trim()
 
-                    DOCKER_IMAGE_NAME = "${DOCKER_REGISTRY}/${APP_NAME}:${APP_VERSION}"
-
                     sh "echo IMAGE_NAME is ${APP_NAME}"
                     sh "echo IMAGE_VERSION is ${APP_VERSION}"
-                    sh "echo DOCKER_IMAGE_NAME is ${DOCKER_IMAGE_NAME}"
-
                     sh "echo TAG is ${params.TAG}"
+
+                    // 메인이 아닌 브랜치일 때만 버전 suffix 붙이기
                     if( params.TAG.startsWith('origin') == false && params.TAG.endsWith('/main') == false ) {
                         if( params.RELEASE == true ) {
                             DOCKER_IMAGE_VERSION += '-RELEASE'
@@ -75,6 +73,11 @@ pipeline {
                             DOCKER_IMAGE_VERSION += '-TAG'
                         }
                     }
+                    // 변경된 APP_VERSION으로 도커 이미지 이름 설정
+                    DOCKER_IMAGE_NAME = "${DOCKER_REGISTRY}/${APP_NAME}:${APP_VERSION}"
+
+                    sh "echo IMAGE_VERSION (after) is ${APP_VERSION}"
+                    sh "echo DOCKER_IMAGE_NAME is ${DOCKER_IMAGE_NAME}"
                 }
             }
         }
