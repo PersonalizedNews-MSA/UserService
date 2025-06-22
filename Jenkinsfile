@@ -76,7 +76,7 @@ pipeline {
                     // 변경된 APP_VERSION으로 도커 이미지 이름 설정
                     DOCKER_IMAGE_NAME = "${DOCKER_REGISTRY}/${APP_NAME}:${APP_VERSION}"
 
-                    sh "echo IMAGE_VERSION (after) is ${APP_VERSION}"
+                    sh "echo IMAGE_VERSION_AFTER is ${APP_VERSION}"
                     sh "echo DOCKER_IMAGE_NAME is ${DOCKER_IMAGE_NAME}"
                 }
             }
