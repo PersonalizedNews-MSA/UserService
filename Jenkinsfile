@@ -34,9 +34,9 @@ pipeline {
 
     environment {
         GIT_URL = "https://github.com/PersonalizedNews-MSA/UserService"
-        GITHUB_CREDENTIAL = "github-token"          // GitHub 인증 정보 ID
-        DOCKER_REGISTRY = "suin4328"                // DockerHub ID
-        DOCKERHUB_CREDENTIAL = "dockerhub-token"    // DockerHub 인증 정보 ID
+        GITHUB_CREDENTIAL = "github-token"
+        DOCKER_REGISTRY = "suin4328"
+        DOCKERHUB_CREDENTIAL = "dockerhub-token"
     }
 
     options {
@@ -69,17 +69,16 @@ pipeline {
             steps {
                 script {
                     APP_VERSION = sh(script: "./gradlew -q getAppVersion", returnStdout: true).trim()
-
-                    // 브랜치명 추출
                     def branch = params.TAG.replaceFirst(/^origin\//, '')
                     echo "▶ 현재 브랜치 or 태그: ${branch}"
 
-                    if (branch == 'main' && params.RELEASE) {
-                        APP_VERSION += "-RELEASE"
+                    if (branch == 'main') {
+                        if (params.RELEASE) {
+                            APP_VERSION += "-RELEASE"
+                        } // 기본은 0.1.0
                     } else if (branch == 'develop') {
                         APP_VERSION += "-develop"
                     } else {
-                        // 태그 기반
                         if (params.RELEASE) {
                             APP_VERSION += "-RELEASE"
                         } else {
@@ -88,7 +87,6 @@ pipeline {
                     }
 
                     DOCKER_IMAGE_NAME = "${DOCKER_REGISTRY}/${APP_NAME}:${APP_VERSION}"
-
                     echo "▶ APP_VERSION: ${APP_VERSION}"
                     echo "▶ DOCKER_IMAGE_NAME: ${DOCKER_IMAGE_NAME}"
                 }
