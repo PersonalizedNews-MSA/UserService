@@ -2,6 +2,7 @@
 def APP_NAME
 def APP_VERSION
 def DOCKER_IMAGE_NAME
+def DOCKER_IMAGE_VERSION
 def PROD_BUILD = false
 pipeline {
     agent {
@@ -64,16 +65,16 @@ pipeline {
                     sh "echo IMAGE_VERSION is ${APP_VERSION}"
                     sh "echo TAG is ${params.TAG}"
 
-                    // 메인이 아닌 브랜치일 때만 버전 suffix 붙이기
-                    if( params.TAG.startsWith('origin') == false && params.TAG.endsWith('/main') == false ) {
-                        if( params.RELEASE == true ) {
-                            DOCKER_IMAGE_VERSION += '-RELEASE'
+                    // 기존 APP_VERSION을 수정해서 suffix 붙이기
+                    if (!params.TAG.startsWith('origin') && !params.TAG.endsWith('/main')) {
+                        if (params.RELEASE == true) {
+                            APP_VERSION += '-RELEASE'
                             PROD_BUILD = true
                         } else {
-                            DOCKER_IMAGE_VERSION += '-TAG'
+                            APP_VERSION += '-TAG'
                         }
                     }
-                    // 변경된 APP_VERSION으로 도커 이미지 이름 설정
+                    // 이 시점에서 APP_VERSION은 예: "0.0.1-RELEASE" 또는 "0.0.1-TAG"
                     DOCKER_IMAGE_NAME = "${DOCKER_REGISTRY}/${APP_NAME}:${APP_VERSION}"
 
                     sh "echo IMAGE_VERSION_AFTER is ${APP_VERSION}"
@@ -84,7 +85,7 @@ pipeline {
 
         stage('Build & Test Application') {
             steps {
-                   sh 'export GRADLE_OPTS="-Xmx2g -Dfile.encoding=UTF-8" && gradle clean build'
+                sh 'export GRADLE_OPTS="-Xmx2g -Dfile.encoding=UTF-8" && gradle clean build'
             }
         }
 
