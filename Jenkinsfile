@@ -90,7 +90,7 @@ pipeline {
                     if (!params.TAG.startsWith('origin') && !params.TAG.endsWith('/main')) {
                         gradleCmd = 'gradle --no-daemon clean build'
                     }
-                    sh "export GRADLE_OPTS='-Xmx2g -Dfile.encoding=UTF-8' && ${gradleCmd}"
+                    sh "export GRADLE_OPTS='-Xmx2g -Xms512m -Dfile.encoding=UTF-8' && ${gradleCmd}"
                 }
             }
         }
