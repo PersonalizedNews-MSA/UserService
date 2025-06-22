@@ -85,7 +85,14 @@ pipeline {
 
         stage('Build & Test Application') {
             steps {
-                sh 'chmod +x ./gradlew && export GRADLE_OPTS="-Xmx2g -Dfile.encoding=UTF-8" && ./gradlew clean build'
+                script {
+                    sh 'chmod +x ./gradlew'
+                    def gradleCmd = './gradlew clean build'
+                    if (!params.TAG.startsWith('origin') && !params.TAG.endsWith('/main')) {
+                        gradleCmd = './gradlew --no-daemon clean build'
+                    }
+                    sh "export GRADLE_OPTS='-Xmx2g -Xms512m -Dfile.encoding=UTF-8' && ${gradleCmd}"
+                }
             }
         }
 
