@@ -69,7 +69,24 @@ pipeline {
             steps {
                 script {
                     APP_VERSION = sh(script: "./gradlew -q getAppVersion", returnStdout: true).trim()
-                    APP_VERSION += params.RELEASE ? "-RELEASE" : "-TAG"
+
+                    // 브랜치명 추출
+                    def branch = params.TAG.replaceFirst(/^origin\//, '')
+                    echo "▶ 현재 브랜치 or 태그: ${branch}"
+
+                    if (branch == 'main' && params.RELEASE) {
+                        APP_VERSION += "-RELEASE"
+                    } else if (branch == 'develop') {
+                        APP_VERSION += "-develop"
+                    } else {
+                        // 태그 기반
+                        if (params.RELEASE) {
+                            APP_VERSION += "-RELEASE"
+                        } else {
+                            APP_VERSION += "-TAG"
+                        }
+                    }
+
                     DOCKER_IMAGE_NAME = "${DOCKER_REGISTRY}/${APP_NAME}:${APP_VERSION}"
 
                     echo "▶ APP_VERSION: ${APP_VERSION}"
