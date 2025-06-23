@@ -1,6 +1,5 @@
 package com.mini2.user_service.service;
 
-
 import com.mini2.user_service.common.exception.BadParameter;
 import com.mini2.user_service.common.exception.NotFound;
 import com.mini2.user_service.domain.SiteUser;
@@ -11,11 +10,13 @@ import com.mini2.user_service.domain.repository.SiteUserRepository;
 import com.mini2.user_service.secret.hash.SecureHashUtils;
 import com.mini2.user_service.secret.jwt.TokenGenerator;
 import com.mini2.user_service.secret.jwt.dto.TokenDto;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Slf4j
@@ -25,6 +26,7 @@ import java.util.Optional;
 public class SiteUserService {
     private final SiteUserRepository siteUserRepository;
     private final TokenGenerator tokenGenerator;
+    private final RefreshTokenService refreshTokenService;
 
     //회원가입
     public void registerUser(SiteUserRegisterDto registerDto) {
@@ -46,8 +48,7 @@ public class SiteUserService {
     }
 
     // 로그인
-    @Transactional(readOnly = true)
-    public TokenDto.AccessRefreshToken login(SiteUserLoginDto loginDto) {
+    public TokenDto.AccessRefreshToken login(SiteUserLoginDto loginDto, HttpServletRequest request) {
         String email = loginDto.getEmail().toLowerCase();
 
         SiteUser user = siteUserRepository.findByEmail(email)
@@ -56,8 +57,15 @@ public class SiteUserService {
         if( !SecureHashUtils.matches(loginDto.getPassword(), user.getPassword())){
             throw new BadParameter("아이디 또는 비밀번호를 확인하세요.");
         }
-        return tokenGenerator.generateAccessRefreshToken(email, "WEB");
+        TokenDto.AccessRefreshToken token = tokenGenerator.generateAccessRefreshToken(email, "WEB");
+
+
+        LocalDateTime expiredAt = LocalDateTime.now().plusSeconds(
+                token.getRefresh().getExpiresIn()
+        );
+
+        String deviceInfo = request.getHeader("User-Agent");
+        refreshTokenService.saveToken(user.getId(), token.getRefresh().getToken(), expiredAt, deviceInfo);
+        return token;
     }
-
-
 }

@@ -5,8 +5,10 @@ import com.mini2.user_service.domain.dto.EmailCheckRequestDto;
 import com.mini2.user_service.domain.dto.SiteUserLoginDto;
 import com.mini2.user_service.domain.dto.SiteUserRegisterDto;
 import com.mini2.user_service.secret.jwt.dto.TokenDto;
+import com.mini2.user_service.service.RefreshTokenService;
 import com.mini2.user_service.service.SiteUserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,8 +45,8 @@ public class UserAuthController {
 
     @Operation(summary = "사용자 로그인", description = "이메일과 비밀번호를 입력받아 JWT 액세스/리프레시 토큰을 반환합니다.")
     @PostMapping(value = "/login")
-    public ApiResponseDto<TokenDto.AccessRefreshToken> login(@RequestBody @Valid SiteUserLoginDto loginDto,HttpServletResponse response) {
-        TokenDto.AccessRefreshToken token = siteUserService.login(loginDto);
+    public ApiResponseDto<TokenDto.AccessRefreshToken> login(@RequestBody @Valid SiteUserLoginDto loginDto, HttpServletResponse response , HttpServletRequest request) {
+        TokenDto.AccessRefreshToken token = siteUserService.login(loginDto,request);
 
         //HttpOnly 쿠키로 설정
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", token.getRefresh().getToken())
