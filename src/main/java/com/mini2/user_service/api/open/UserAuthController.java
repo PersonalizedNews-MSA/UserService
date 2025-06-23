@@ -1,6 +1,7 @@
 package com.mini2.user_service.api.open;
 
 import com.mini2.user_service.common.dto.ApiResponseDto;
+import com.mini2.user_service.domain.dto.EmailCheckRequestDto;
 import com.mini2.user_service.domain.dto.SiteUserLoginDto;
 import com.mini2.user_service.domain.dto.SiteUserRegisterDto;
 import com.mini2.user_service.secret.jwt.dto.TokenDto;
@@ -31,6 +32,13 @@ public class UserAuthController {
     public ApiResponseDto<String> register(@RequestBody @Valid SiteUserRegisterDto registerDto) {
         siteUserService.registerUser(registerDto);
         return ApiResponseDto.defaultOk();
+    }
+
+    @Operation(summary = "이메일 중복 확인", description = "이메일이 이미 존재하는지 확인합니다.")
+    @PostMapping("/email")
+    public ApiResponseDto<Boolean> checkEmail(@RequestBody @Valid EmailCheckRequestDto emailCheckDto){
+        boolean isAvailable = siteUserService.isEmailAvailable(emailCheckDto);
+        return ApiResponseDto.createOk(isAvailable);
     }
 
     @Operation(summary = "사용자 로그인", description = "이메일과 비밀번호를 입력받아 JWT 액세스/리프레시 토큰을 반환합니다.")
