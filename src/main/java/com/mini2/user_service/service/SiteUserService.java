@@ -10,6 +10,7 @@ import com.mini2.user_service.domain.repository.SiteUserRepository;
 import com.mini2.user_service.secret.hash.SecureHashUtils;
 import com.mini2.user_service.secret.jwt.TokenGenerator;
 import com.mini2.user_service.secret.jwt.dto.TokenDto;
+import com.mini2.user_service.secret.jwt.util.DeviceUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +49,7 @@ public class SiteUserService {
     }
 
     // 로그인
-    public TokenDto.AccessRefreshToken login(SiteUserLoginDto loginDto, HttpServletRequest request) {
+    public TokenDto.AccessRefreshToken login(SiteUserLoginDto loginDto, String deviceInfo) {
         String email = loginDto.getEmail().toLowerCase();
 
         SiteUser user = siteUserRepository.findByEmail(email)
@@ -58,15 +59,10 @@ public class SiteUserService {
             throw new BadParameter("아이디 또는 비밀번호를 확인하세요.");
         }
         TokenDto.AccessRefreshToken token = tokenGenerator.generateAccessRefreshToken(user.getId(), "WEB");
-        saveToken(user.getId(), token.getRefresh(), request);
+        refreshTokenService.saveToken(user.getId(), token.getRefresh() , deviceInfo);
         return token;
     }
 
-    private void saveToken(Long userId, TokenDto.JwtToken token, HttpServletRequest request) {
-        String deviceInfo = Optional.ofNullable(request.getHeader("User-Agent")).orElse("UNKNOWN");
-        LocalDateTime expiredAt = LocalDateTime.now().plusSeconds(token.getExpiresIn());
 
-        refreshTokenService.saveToken(userId, token.getToken(), expiredAt, deviceInfo);
-    }
 
 }

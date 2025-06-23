@@ -59,4 +59,5 @@ public class RefreshToken {
     public void invalidate() {
         this.valid = false;
     }
+
 }
