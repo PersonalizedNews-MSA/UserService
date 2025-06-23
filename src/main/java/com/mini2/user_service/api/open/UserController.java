@@ -1,19 +1,27 @@
 package com.mini2.user_service.api.open;
 
 import com.mini2.user_service.common.dto.ApiResponseDto;
+import com.mini2.user_service.common.web.context.GatewayRequestHeaderUtils;
+import com.mini2.user_service.domain.User;
 import com.mini2.user_service.domain.dto.EmailCheckRequestDto;
+import com.mini2.user_service.domain.dto.UserInfoResponseDto;
 import com.mini2.user_service.service.UserService;
 import com.mini2.user_service.util.CookieUtils;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping(value = "/api/user/v1", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "User API", description = "사용자 정보 관련 API")
 public class UserController {
     private final UserService userService;
@@ -23,6 +31,14 @@ public class UserController {
     public ApiResponseDto<Boolean> checkEmail(@RequestBody @Valid EmailCheckRequestDto emailCheckDto){
         boolean isAvailable = userService.isEmailAvailable(emailCheckDto);
         return ApiResponseDto.createOk(isAvailable);
+    }
+
+    @Operation(summary = "사용자 정보 조회", description = "사용자의 ID를 기반으로 사용자 정보를 조회합니다.")
+    @GetMapping("/profile")
+    public ApiResponseDto<UserInfoResponseDto> getMyInfo() {
+        Long userId = Long.valueOf(GatewayRequestHeaderUtils.getUserIdOrThrowException());
+        UserInfoResponseDto userInfo = userService.getUserInfo(userId);
+        return ApiResponseDto.createOk(userInfo);
     }
 
     @Operation(summary = "회원 탈퇴", description = "현재 로그인된 사용자의 계정을 탈퇴 처리합니다.")

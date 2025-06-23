@@ -4,6 +4,7 @@ import com.mini2.user_service.common.exception.BadParameter;
 import com.mini2.user_service.common.exception.NotFound;
 import com.mini2.user_service.domain.User;
 import com.mini2.user_service.domain.dto.EmailCheckRequestDto;
+import com.mini2.user_service.domain.dto.UserInfoResponseDto;
 import com.mini2.user_service.domain.repository.UserRepository;
 import com.mini2.user_service.secret.jwt.TokenGenerator;
 import com.mini2.user_service.secret.jwt.util.DeviceUtils;
@@ -30,6 +31,16 @@ public class UserService {
     public boolean isEmailAvailable(EmailCheckRequestDto emailDto) {
         String email = emailDto.getEmail().toLowerCase();
         return !userRepository.existsByEmailAndDeletedFalse(email);
+    }
+    //유저 정보 조회
+    public UserInfoResponseDto getUserInfo(Long id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NotFound("사용자 정보를 찾을 수 없습니다."));
+
+        return UserInfoResponseDto.builder()
+                .email(user.getEmail())
+                .name(user.getName())
+                .build();
     }
 
     //회원 탈퇴
