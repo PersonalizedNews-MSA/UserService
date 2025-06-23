@@ -22,7 +22,7 @@ public class TokenGenerator {
 
     private SecretKey getSecretKey() {
         if (secretKey == null) {
-            synchronized (this) { //Double-Checked Locking
+            synchronized (this) {
                 if (secretKey == null) {
                     String secret = configProperties.getSecretKey();
                     byte[] decoded = Decoders.BASE64.decode(secret);

@@ -8,15 +8,10 @@ import com.mini2.user_service.domain.dto.UserInfoResponseDto;
 import com.mini2.user_service.domain.dto.UserUpdateRequestDto;
 import com.mini2.user_service.domain.repository.UserRepository;
 import com.mini2.user_service.secret.jwt.TokenGenerator;
-import com.mini2.user_service.secret.jwt.util.DeviceUtils;
-import com.mini2.user_service.util.CookieUtils;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -52,9 +47,7 @@ public class UserService {
     }
 
     //회원 탈퇴
-    public void withdrawByRequest(HttpServletRequest request) {
-        String refreshToken = CookieUtils.extractRefreshToken(request);
-        String deviceInfo = DeviceUtils.getDeviceInfo(request);
+    public void withdrawByRequest(String refreshToken ,String deviceInfo) {
         String userIdStr = tokenGenerator.validateJwtToken(refreshToken);
 
         if (userIdStr == null) throw new BadParameter("잘못된 토큰입니다.");

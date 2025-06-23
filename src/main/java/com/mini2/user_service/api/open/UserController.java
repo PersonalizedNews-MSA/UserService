@@ -2,22 +2,18 @@ package com.mini2.user_service.api.open;
 
 import com.mini2.user_service.common.dto.ApiResponseDto;
 import com.mini2.user_service.common.web.context.GatewayRequestHeaderUtils;
-import com.mini2.user_service.domain.User;
 import com.mini2.user_service.domain.dto.EmailCheckRequestDto;
 import com.mini2.user_service.domain.dto.UserInfoResponseDto;
 import com.mini2.user_service.domain.dto.UserUpdateRequestDto;
 import com.mini2.user_service.service.UserService;
 import com.mini2.user_service.util.CookieUtils;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -54,8 +50,10 @@ public class UserController {
     @Operation(summary = "회원 탈퇴", description = "현재 로그인된 사용자의 계정을 탈퇴 처리합니다.")
     @DeleteMapping("/signout")
     public ApiResponseDto<String> withdraw(HttpServletRequest request, HttpServletResponse response) {
+        String refreshToken = CookieUtils.extractRefreshToken(request);
+        String deviceInfo = GatewayRequestHeaderUtils.getClientDeviceOrThrowException();
+        userService.withdrawByRequest(refreshToken , deviceInfo);
         CookieUtils.deleteCookie(response,"refreshToken");
-        userService.withdrawByRequest(request);
         return ApiResponseDto.createOk("탈퇴 되었습니다.");
     }
 }

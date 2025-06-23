@@ -20,6 +20,7 @@ public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final TokenGenerator tokenGenerator;
 
+    //토큰 저장
     public void saveToken(Long userId, TokenDto.JwtToken token, String deviceInfo) {
         LocalDateTime expiredAt = LocalDateTime.now().plusSeconds(token.getExpiresIn());
         Optional<RefreshToken> optional = refreshTokenRepository.findByUserIdAndDeviceInfo(userId, deviceInfo);
@@ -47,6 +48,7 @@ public class RefreshTokenService {
     }
 
 
+    //토큰 재발급
     public TokenDto.AccessToken reissueAccessToken(String refreshTokenValue, String deviceInfo) {
         //리프레시 토큰을 디코딩하여 userId 추출 (유효성 검증 포함)
         String userIdStr = tokenGenerator.validateJwtToken(refreshTokenValue);

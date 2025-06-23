@@ -2,7 +2,7 @@ package com.mini2.user_service.service;
 
 import com.mini2.user_service.common.exception.BadParameter;
 import com.mini2.user_service.domain.User;
-import com.mini2.user_service.domain.dto.SiteUserRegisterDto;
+import com.mini2.user_service.domain.dto.UserRegisterRequestDto;
 import com.mini2.user_service.domain.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ class UserAuthServiceTest {
     @Test
     void 회원가입_성공() {
         // given
-        SiteUserRegisterDto dto = new SiteUserRegisterDto();
+        UserRegisterRequestDto dto = new UserRegisterRequestDto();
         dto.setEmail("test@example.com");
         dto.setPassword("Password123!");
         dto.setName("홍길동");
@@ -46,7 +46,7 @@ class UserAuthServiceTest {
         User user = User.create("test@example.com", "Password123!", "홍길동");
         userRepository.save(user);
 
-        SiteUserRegisterDto dto = new SiteUserRegisterDto();
+        UserRegisterRequestDto dto = new UserRegisterRequestDto();
         dto.setEmail("test@example.com");
         dto.setPassword("Password123!");
         dto.setName("홍길동");
@@ -58,7 +58,7 @@ class UserAuthServiceTest {
     @Test
     void 이메일_대문자입력_저장시_소문자처리() {
         // given
-        SiteUserRegisterDto dto = new SiteUserRegisterDto();
+        UserRegisterRequestDto dto = new UserRegisterRequestDto();
         dto.setEmail("TEST@EXAMPLE.COM");
         dto.setPassword("Password123!");
         dto.setName("홍길동");

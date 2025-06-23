@@ -3,8 +3,8 @@ package com.mini2.user_service.service;
 import com.mini2.user_service.common.exception.BadParameter;
 import com.mini2.user_service.common.exception.NotFound;
 import com.mini2.user_service.domain.User;
-import com.mini2.user_service.domain.dto.SiteUserLoginDto;
-import com.mini2.user_service.domain.dto.SiteUserRegisterDto;
+import com.mini2.user_service.domain.dto.UserLoginRequestDto;
+import com.mini2.user_service.domain.dto.UserRegisterRequestDto;
 import com.mini2.user_service.domain.repository.UserRepository;
 import com.mini2.user_service.secret.hash.SecureHashUtils;
 import com.mini2.user_service.secret.jwt.TokenGenerator;
@@ -26,7 +26,7 @@ public class UserAuthService {
     private final RefreshTokenService refreshTokenService;
 
     //회원가입
-    public void registerUser(SiteUserRegisterDto registerDto) {
+    public void registerUser(UserRegisterRequestDto registerDto) {
         String email = registerDto.getEmail().toLowerCase();
 
         Optional<User> optionalUser = userRepository.findByEmail(email);
@@ -39,7 +39,7 @@ public class UserAuthService {
     }
 
     // 로그인
-    public TokenDto.AccessRefreshToken login(SiteUserLoginDto loginDto, String deviceInfo) {
+    public TokenDto.AccessRefreshToken login(UserLoginRequestDto loginDto, String deviceInfo) {
         String email = loginDto.getEmail().toLowerCase();
 
         User user = userRepository.findByEmailAndDeletedFalse(email)
