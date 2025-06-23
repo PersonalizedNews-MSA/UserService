@@ -1,0 +1,33 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      connection-test-query: SELECT 1  # HikariCP 유효성 검사 추가
+      validation-timeout: 5000
+  jpa:
+    hibernate:
+      ddl-auto: update
+      generate-ddl: true
+      show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.type: trace
+
+jwt:
+  expires-in: ${JWT_EXPIRES_IN}
+  mobile-expires-in: ${JWT_MOBILE_EXPIRES_IN}
+  table-expires-in: ${JWT_TABLE_EXPIRES_IN}
+  secret-key: ${JWT_SECRET}
