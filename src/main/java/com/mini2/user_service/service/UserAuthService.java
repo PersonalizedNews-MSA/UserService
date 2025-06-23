@@ -2,11 +2,11 @@ package com.mini2.user_service.service;
 
 import com.mini2.user_service.common.exception.BadParameter;
 import com.mini2.user_service.common.exception.NotFound;
-import com.mini2.user_service.domain.SiteUser;
+import com.mini2.user_service.domain.User;
 import com.mini2.user_service.domain.dto.EmailCheckRequestDto;
 import com.mini2.user_service.domain.dto.SiteUserLoginDto;
 import com.mini2.user_service.domain.dto.SiteUserRegisterDto;
-import com.mini2.user_service.domain.repository.SiteUserRepository;
+import com.mini2.user_service.domain.repository.UserRepository;
 import com.mini2.user_service.secret.hash.SecureHashUtils;
 import com.mini2.user_service.secret.jwt.TokenGenerator;
 import com.mini2.user_service.secret.jwt.dto.TokenDto;
@@ -22,7 +22,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional
 public class UserAuthService {
-    private final SiteUserRepository siteUserRepository;
+    private final UserRepository userRepository;
     private final TokenGenerator tokenGenerator;
     private final RefreshTokenService refreshTokenService;
 
@@ -30,26 +30,26 @@ public class UserAuthService {
     public void registerUser(SiteUserRegisterDto registerDto) {
         String email = registerDto.getEmail().toLowerCase();
 
-        Optional<SiteUser> optionalUser = siteUserRepository.findByEmail(email);
-        if (optionalUser.isPresent()) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isPresent() && !optionalUser.get().getDeleted()) {
             throw new BadParameter("이미 사용 중인 이메일입니다. 다른 이메일을 사용해주세요.");
         }
 
-        SiteUser siteUser = SiteUser.create(email, registerDto.getPassword(), registerDto.getName());
-        siteUserRepository.save(siteUser);
+        User user = User.create(email, registerDto.getPassword(), registerDto.getName());
+        userRepository.save(user);
     }
 
     //이메일 중복확인
     public boolean isEmailAvailable(EmailCheckRequestDto emailDto) {
         String email = emailDto.getEmail().toLowerCase();
-        return siteUserRepository.existsByEmail(email);
+        return userRepository.existsByEmail(email);
     }
 
     // 로그인
     public TokenDto.AccessRefreshToken login(SiteUserLoginDto loginDto, String deviceInfo) {
         String email = loginDto.getEmail().toLowerCase();
 
-        SiteUser user = siteUserRepository.findByEmail(email)
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFound("아이디 또는 비밀번호를 확인하세요."));
 
         if( !SecureHashUtils.matches(loginDto.getPassword(), user.getPassword())){

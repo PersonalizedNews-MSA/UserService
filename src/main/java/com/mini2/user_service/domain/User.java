@@ -16,14 +16,14 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "site_user")
 @Getter
-public class SiteUser {
+public class User {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Setter
-    @Column(name="email" , nullable = false, length = 50, unique = true)
+    @Column(name="email" , nullable = false, length = 50)
     private String email;
 
     @Setter
@@ -49,9 +49,11 @@ public class SiteUser {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-
-    public static SiteUser create(String email, String password, String name) {
-        SiteUser user = new SiteUser();
+    public void markAsDeleted() {
+        this.deleted = true;
+    }
+    public static User create(String email, String password, String name) {
+        User user = new User();
         user.setEmail(email);
         user.setPassword(SecureHashUtils.hash(password));
         user.setName(name);

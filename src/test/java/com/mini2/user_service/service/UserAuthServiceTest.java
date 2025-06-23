@@ -1,9 +1,9 @@
 package com.mini2.user_service.service;
 
 import com.mini2.user_service.common.exception.BadParameter;
-import com.mini2.user_service.domain.SiteUser;
+import com.mini2.user_service.domain.User;
 import com.mini2.user_service.domain.dto.SiteUserRegisterDto;
-import com.mini2.user_service.domain.repository.SiteUserRepository;
+import com.mini2.user_service.domain.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,7 +21,7 @@ class UserAuthServiceTest {
     @Autowired
     private UserAuthService userAuthService;
     @Autowired
-    private SiteUserRepository siteUserRepository;
+    private UserRepository userRepository;
 
     @Test
     void 회원가입_성공() {
@@ -35,7 +35,7 @@ class UserAuthServiceTest {
         userAuthService.registerUser(dto);
 
         // then
-        Optional<SiteUser> user = siteUserRepository.findByEmail("test@example.com");
+        Optional<User> user = userRepository.findByEmail("test@example.com");
         assertTrue(user.isPresent());
         assertEquals("홍길동", user.get().getName());
     }
@@ -43,8 +43,8 @@ class UserAuthServiceTest {
     @Test
     void 이메일_중복_회원가입_실패() {
         // given
-        SiteUser siteUser = SiteUser.create("test@example.com", "Password123!", "홍길동");
-        siteUserRepository.save(siteUser);
+        User user = User.create("test@example.com", "Password123!", "홍길동");
+        userRepository.save(user);
 
         SiteUserRegisterDto dto = new SiteUserRegisterDto();
         dto.setEmail("test@example.com");
@@ -67,7 +67,7 @@ class UserAuthServiceTest {
         userAuthService.registerUser(dto);
 
         // then
-        Optional<SiteUser> user = siteUserRepository.findByEmail("test@example.com");
+        Optional<User> user = userRepository.findByEmail("test@example.com");
         assertTrue(user.isPresent());
         assertEquals("test@example.com", user.get().getEmail());
     }
