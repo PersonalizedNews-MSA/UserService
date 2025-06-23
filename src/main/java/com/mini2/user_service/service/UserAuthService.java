@@ -3,7 +3,6 @@ package com.mini2.user_service.service;
 import com.mini2.user_service.common.exception.BadParameter;
 import com.mini2.user_service.common.exception.NotFound;
 import com.mini2.user_service.domain.User;
-import com.mini2.user_service.domain.dto.EmailCheckRequestDto;
 import com.mini2.user_service.domain.dto.SiteUserLoginDto;
 import com.mini2.user_service.domain.dto.SiteUserRegisterDto;
 import com.mini2.user_service.domain.repository.UserRepository;
@@ -37,12 +36,6 @@ public class UserAuthService {
 
         User user = User.create(email, registerDto.getPassword(), registerDto.getName());
         userRepository.save(user);
-    }
-
-    //이메일 중복확인
-    public boolean isEmailAvailable(EmailCheckRequestDto emailDto) {
-        String email = emailDto.getEmail().toLowerCase();
-        return !userRepository.existsByEmailAndDeletedFalse(email);
     }
 
     // 로그인

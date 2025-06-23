@@ -3,6 +3,7 @@ package com.mini2.user_service.service;
 import com.mini2.user_service.common.exception.BadParameter;
 import com.mini2.user_service.common.exception.NotFound;
 import com.mini2.user_service.domain.User;
+import com.mini2.user_service.domain.dto.EmailCheckRequestDto;
 import com.mini2.user_service.domain.repository.UserRepository;
 import com.mini2.user_service.secret.jwt.TokenGenerator;
 import com.mini2.user_service.secret.jwt.util.DeviceUtils;
@@ -13,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -22,6 +25,14 @@ public class UserService {
     private final RefreshTokenService refreshTokenService;
     private final TokenGenerator tokenGenerator;
 
+
+    //이메일 중복확인
+    public boolean isEmailAvailable(EmailCheckRequestDto emailDto) {
+        String email = emailDto.getEmail().toLowerCase();
+        return !userRepository.existsByEmailAndDeletedFalse(email);
+    }
+
+    //회원 탈퇴
     public void withdrawByRequest(HttpServletRequest request) {
         String refreshToken = CookieUtils.extractRefreshToken(request);
         String deviceInfo = DeviceUtils.getDeviceInfo(request);
