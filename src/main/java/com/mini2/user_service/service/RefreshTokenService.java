@@ -48,20 +48,26 @@ public class RefreshTokenService {
 
 
     public TokenDto.AccessToken reissueAccessToken(String refreshTokenValue, String deviceInfo) {
+        //리프레시 토큰을 디코딩하여 userId 추출 (유효성 검증 포함)
         String userIdStr = tokenGenerator.validateJwtToken(refreshTokenValue);
         if (userIdStr == null) {
+            // 토큰이 만료되었거나 서명 위조된 경우
             throw new BadParameter("유효하지 않은 토큰입니다.");
         }
         Long userId = Long.parseLong(userIdStr);
 
+        //DB에서 해당 userId와 deviceInfo로 저장된 리프레시 토큰 엔티티 조회
         RefreshToken tokenEntity = refreshTokenRepository.findByUserIdAndDeviceInfo(userId, deviceInfo)
                 .orElseThrow(() -> new NotFound("해당 리프레시 토큰을 찾을 수 없습니다."));
 
+        //리프레시 토큰이 유효하지 않거나 만료되었는지 확인
         if (!tokenEntity.isValid() || tokenEntity.getExpiredAt().isBefore(LocalDateTime.now())) {
+            // 만료되었거나 비활성화된 토큰은 무효화 처리
             tokenEntity.invalidate();
             throw new BadParameter("만료되었거나 유효하지 않은 리프레시 토큰입니다.");
         }
 
+        // 모든 검증 통과 → 새로운 AccessToken 생성 후 반환
         return tokenGenerator.generateAccessToken(userId, deviceInfo);
     }
 

@@ -87,6 +87,8 @@ public class UserAuthController {
 
         ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
+                .secure(false)
+                .sameSite("Strict")
                 .path("/")
                 .maxAge(0)
                 .build();

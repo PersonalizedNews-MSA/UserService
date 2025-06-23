@@ -42,14 +42,14 @@ public class UserAuthService {
     //이메일 중복확인
     public boolean isEmailAvailable(EmailCheckRequestDto emailDto) {
         String email = emailDto.getEmail().toLowerCase();
-        return userRepository.existsByEmail(email);
+        return !userRepository.existsByEmailAndDeletedFalse(email);
     }
 
     // 로그인
     public TokenDto.AccessRefreshToken login(SiteUserLoginDto loginDto, String deviceInfo) {
         String email = loginDto.getEmail().toLowerCase();
 
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findByEmailAndDeletedFalse(email)
                 .orElseThrow(() -> new NotFound("아이디 또는 비밀번호를 확인하세요."));
 
         if( !SecureHashUtils.matches(loginDto.getPassword(), user.getPassword())){
