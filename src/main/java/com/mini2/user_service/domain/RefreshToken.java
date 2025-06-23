@@ -50,10 +50,10 @@ public class RefreshToken {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    public RefreshToken update(String newToken, LocalDateTime newExpiry) {
+    public void update(String newToken, LocalDateTime newExpiredAt) {
         this.refreshToken = newToken;
-        this.expiredAt = newExpiry;
-        return this;
+        this.expiredAt = newExpiredAt;
+        this.valid = true;
     }
 
     public void invalidate() {

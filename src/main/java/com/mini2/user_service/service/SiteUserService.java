@@ -57,15 +57,16 @@ public class SiteUserService {
         if( !SecureHashUtils.matches(loginDto.getPassword(), user.getPassword())){
             throw new BadParameter("아이디 또는 비밀번호를 확인하세요.");
         }
-        TokenDto.AccessRefreshToken token = tokenGenerator.generateAccessRefreshToken(email, "WEB");
-
-
-        LocalDateTime expiredAt = LocalDateTime.now().plusSeconds(
-                token.getRefresh().getExpiresIn()
-        );
-
-        String deviceInfo = request.getHeader("User-Agent");
-        refreshTokenService.saveToken(user.getId(), token.getRefresh().getToken(), expiredAt, deviceInfo);
+        TokenDto.AccessRefreshToken token = tokenGenerator.generateAccessRefreshToken(user.getId(), "WEB");
+        saveToken(user.getId(), token.getRefresh(), request);
         return token;
     }
+
+    private void saveToken(Long userId, TokenDto.JwtToken token, HttpServletRequest request) {
+        String deviceInfo = Optional.ofNullable(request.getHeader("User-Agent")).orElse("UNKNOWN");
+        LocalDateTime expiredAt = LocalDateTime.now().plusSeconds(token.getExpiresIn());
+
+        refreshTokenService.saveToken(userId, token.getToken(), expiredAt, deviceInfo);
+    }
+
 }

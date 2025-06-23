@@ -34,28 +34,28 @@ public class TokenGenerator {
         return secretKey;
     }
 
-    public TokenDto.AccessToken generateAccessToken(String userEmail, String deviceType) {
-        TokenDto.JwtToken jwtToken = this.generateJwtToken(userEmail, deviceType, false);
+    public TokenDto.AccessToken generateAccessToken(Long userId, String deviceType) {
+        TokenDto.JwtToken jwtToken = this.generateJwtToken(userId, deviceType, false);
         return new TokenDto.AccessToken(jwtToken);
     }
 
-    public TokenDto.AccessRefreshToken generateAccessRefreshToken(String userEmail, String deviceType) {
-        TokenDto.JwtToken accessJwtToken = this.generateJwtToken(userEmail, deviceType, false);
-        TokenDto.JwtToken refreshJwtToken = this.generateJwtToken(userEmail, deviceType, true);
+    public TokenDto.AccessRefreshToken generateAccessRefreshToken(Long userId, String deviceType) {
+        TokenDto.JwtToken accessJwtToken = this.generateJwtToken(userId, deviceType, false);
+        TokenDto.JwtToken refreshJwtToken = this.generateJwtToken(userId, deviceType, true);
         return new TokenDto.AccessRefreshToken(accessJwtToken, refreshJwtToken);
     }
 
 
     //== 사용자의 정보를 바탕으로 JWT를 생성하고, 만료 시간과 함께 DTO로 반환 ==
-    public TokenDto.JwtToken generateJwtToken(String userEmail, String deviceType, boolean refreshToken) {
-        log.info("JWT 생성 시작 - userEmail: {}, deviceType: {}, refreshToken: {}", userEmail, deviceType, refreshToken);
+    public TokenDto.JwtToken generateJwtToken(Long userId, String deviceType, boolean refreshToken) {
+        log.info("JWT 생성 시작 - userId: {}, deviceType: {}, refreshToken: {}", userId, deviceType, refreshToken);
         int tokenExpiresIn = tokenExpiresIn(refreshToken, deviceType);
         String tokenType = refreshToken ? "refresh" : "access";
 
         String token = Jwts.builder()
                 .issuer("welab")
-                .subject(userEmail)
-                .claim("userEmail", userEmail)
+                .subject(String.valueOf(userId))
+                .claim("userId", userId)
                 .claim("deviceType", deviceType)
                 .claim("tokenType", tokenType)
                 .issuedAt(new Date())
@@ -70,7 +70,7 @@ public class TokenGenerator {
 
     //== refreshToken을 검증 로직
     public String validateJwtToken(String refreshToken){
-        String userEmail = null;
+        String userId = null;
         final Claims claims = this.verifyAndGetClaims(refreshToken);
 
         if(claims == null){
@@ -82,13 +82,13 @@ public class TokenGenerator {
             return null;
         }
 
-        userEmail = claims.get("userEmail",String.class);
+        userId = claims.get("userId",String.class);
 
         String tokenType = claims.get("tokenType", String.class);
         if (!"refresh".equals(tokenType)){
             return null;
         }
-        return userEmail;
+        return userId;
     }
 
     private Claims verifyAndGetClaims(String token) {
