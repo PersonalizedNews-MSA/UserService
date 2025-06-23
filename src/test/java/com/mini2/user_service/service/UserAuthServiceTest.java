@@ -17,9 +17,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 @SpringBootTest
 @Transactional
-class SiteUserServiceTest {
+class UserAuthServiceTest {
     @Autowired
-    private SiteUserService siteUserService;
+    private UserAuthService userAuthService;
     @Autowired
     private SiteUserRepository siteUserRepository;
 
@@ -32,7 +32,7 @@ class SiteUserServiceTest {
         dto.setName("홍길동");
 
         // when
-        siteUserService.registerUser(dto);
+        userAuthService.registerUser(dto);
 
         // then
         Optional<SiteUser> user = siteUserRepository.findByEmail("test@example.com");
@@ -52,7 +52,7 @@ class SiteUserServiceTest {
         dto.setName("홍길동");
 
         // when & then
-        assertThrows(BadParameter.class, () -> siteUserService.registerUser(dto));
+        assertThrows(BadParameter.class, () -> userAuthService.registerUser(dto));
     }
 
     @Test
@@ -64,7 +64,7 @@ class SiteUserServiceTest {
         dto.setName("홍길동");
 
         // when
-        siteUserService.registerUser(dto);
+        userAuthService.registerUser(dto);
 
         // then
         Optional<SiteUser> user = siteUserRepository.findByEmail("test@example.com");

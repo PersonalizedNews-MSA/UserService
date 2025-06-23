@@ -10,21 +10,18 @@ import com.mini2.user_service.domain.repository.SiteUserRepository;
 import com.mini2.user_service.secret.hash.SecureHashUtils;
 import com.mini2.user_service.secret.jwt.TokenGenerator;
 import com.mini2.user_service.secret.jwt.dto.TokenDto;
-import com.mini2.user_service.secret.jwt.util.DeviceUtils;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class SiteUserService {
+public class UserAuthService {
     private final SiteUserRepository siteUserRepository;
     private final TokenGenerator tokenGenerator;
     private final RefreshTokenService refreshTokenService;
@@ -63,6 +60,16 @@ public class SiteUserService {
         return token;
     }
 
+    //로그아웃
+    public void logout(String refreshToken, String deviceInfo) {
+        String userIdStr = tokenGenerator.validateJwtToken(refreshToken);
+        if (userIdStr == null) {
+            throw new BadParameter("유효하지 않은 토큰입니다.");
+        }
+        Long userId = Long.parseLong(userIdStr);
+
+        refreshTokenService.logout(userId, deviceInfo);
+    }
 
 
 }

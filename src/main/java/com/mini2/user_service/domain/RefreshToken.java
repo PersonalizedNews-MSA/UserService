@@ -1,10 +1,7 @@
 package com.mini2.user_service.domain;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.annotation.CreatedDate;
 
@@ -56,8 +53,23 @@ public class RefreshToken {
         this.valid = true;
     }
 
+    public void markAsValid() {
+        this.valid = true;
+    }
+
     public void invalidate() {
         this.valid = false;
     }
+
+    public static RefreshToken create(Long userId, String token, LocalDateTime expiredAt, String deviceInfo) {
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.userId = userId;
+        refreshToken.refreshToken = token;
+        refreshToken.expiredAt = expiredAt;
+        refreshToken.deviceInfo = deviceInfo;
+        refreshToken.valid = true;
+        return refreshToken;
+    }
+
 
 }

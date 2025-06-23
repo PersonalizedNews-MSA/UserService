@@ -25,38 +25,53 @@ public class RefreshTokenService {
         Optional<RefreshToken> optional = refreshTokenRepository.findByUserIdAndDeviceInfo(userId, deviceInfo);
 
         if (optional.isPresent()) {
-            RefreshToken existingToken = optional.get();
-            existingToken.update(token.getToken(), expiredAt);
+            RefreshToken existing = optional.get();
+
+            // 만료 여부 확인
+            if (existing.getExpiredAt().isAfter(LocalDateTime.now())) {
+                // 아직 유효한 경우 (로그아웃한 사용자일 수도 있음)
+                existing.update(token.getToken(), expiredAt);
+                if (!existing.isValid()) {
+                    existing.markAsValid();
+                }
+            } else {
+                // 만료된 경우에도 갱신
+                existing.update(token.getToken(), expiredAt);
+                existing.markAsValid();
+            }
+
         } else {
-            RefreshToken newToken = new RefreshToken(
-                    null, userId, token.getToken(), expiredAt, true, deviceInfo, null, null
-            );
+            RefreshToken newToken = RefreshToken.create(userId, token.getToken(), expiredAt, deviceInfo);
             refreshTokenRepository.save(newToken);
         }
     }
 
-    public void updateToken(Long userId, String newToken, LocalDateTime newExpiredAt) {
-        refreshTokenRepository.findByUserId(userId)
-                .orElseThrow(() -> new NotFound("토큰 없음"));
-//        token.update(newToken, newExpiredAt);
-    }
-
-    public RefreshToken getByToken(String token) {
-        return refreshTokenRepository.findByRefreshToken(token)
-                .orElseThrow(() -> new NotFound("해당 리프레시 토큰을 찾을 수 없습니다."));
-    }
-
 
     public TokenDto.AccessToken reissueAccessToken(String refreshTokenValue, String deviceInfo) {
-        RefreshToken tokenEntity = getByToken(refreshTokenValue);
+        String userIdStr = tokenGenerator.validateJwtToken(refreshTokenValue);
+        if (userIdStr == null) {
+            throw new BadParameter("유효하지 않은 토큰입니다.");
+        }
+        Long userId = Long.parseLong(userIdStr);
+
+        RefreshToken tokenEntity = refreshTokenRepository.findByUserIdAndDeviceInfo(userId, deviceInfo)
+                .orElseThrow(() -> new NotFound("해당 리프레시 토큰을 찾을 수 없습니다."));
 
         if (!tokenEntity.isValid() || tokenEntity.getExpiredAt().isBefore(LocalDateTime.now())) {
             tokenEntity.invalidate();
             throw new BadParameter("만료되었거나 유효하지 않은 리프레시 토큰입니다.");
         }
 
-        TokenDto.AccessToken newAccessToken = tokenGenerator.generateAccessToken(tokenEntity.getUserId(), deviceInfo);
-        return newAccessToken;
+        return tokenGenerator.generateAccessToken(userId, deviceInfo);
+    }
+
+
+    // 로그아웃
+    public void logout(Long userId, String deviceInfo) {
+        RefreshToken token = refreshTokenRepository.findByUserIdAndDeviceInfo(userId, deviceInfo)
+                .orElseThrow(() -> new NotFound("해당 사용자의 토큰이 없습니다."));
+
+        token.invalidate();
     }
 
 }
