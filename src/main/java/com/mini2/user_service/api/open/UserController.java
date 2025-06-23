@@ -5,6 +5,7 @@ import com.mini2.user_service.common.web.context.GatewayRequestHeaderUtils;
 import com.mini2.user_service.domain.User;
 import com.mini2.user_service.domain.dto.EmailCheckRequestDto;
 import com.mini2.user_service.domain.dto.UserInfoResponseDto;
+import com.mini2.user_service.domain.dto.UserUpdateRequestDto;
 import com.mini2.user_service.service.UserService;
 import com.mini2.user_service.util.CookieUtils;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,6 +41,15 @@ public class UserController {
         UserInfoResponseDto userInfo = userService.getUserInfo(userId);
         return ApiResponseDto.createOk(userInfo);
     }
+
+    @Operation(summary = "유저 이름 수정", description = "현재 로그인된 사용자의 정보를 수정합니다.")
+    @PutMapping("/name")
+    public ApiResponseDto<String> updateUser( @RequestBody @Valid UserUpdateRequestDto userDto){
+        Long userId = Long.valueOf(GatewayRequestHeaderUtils.getUserIdOrThrowException());
+        userService.updateUserInfo(userId, userDto);
+        return ApiResponseDto.createOk("사용자 정보 수정이 완료되었습니다.");
+    }
+
 
     @Operation(summary = "회원 탈퇴", description = "현재 로그인된 사용자의 계정을 탈퇴 처리합니다.")
     @DeleteMapping("/signout")

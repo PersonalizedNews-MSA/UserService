@@ -52,6 +52,9 @@ public class User {
     public void markAsDeleted() {
         this.deleted = true;
     }
+    public void updateUsername(String name) {
+        this.name = name;
+    }
     public static User create(String email, String password, String name) {
         User user = new User();
         user.setEmail(email);
