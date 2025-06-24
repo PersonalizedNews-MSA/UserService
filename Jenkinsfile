@@ -33,6 +33,10 @@ pipeline {
         DOCKERHUB_CREDENTIAL = 'dockerhub-token'
 
         KAFKA_BROKER = "${params.KAFKA_BROKER}" // Jenkins UI Parameter 등록
+
+        JAVA_HOME = "/opt/java/openjdk"
+        PATH = "${JAVA_HOME}/bin:${PATH}"
+        GRADLE_OPTS = "-Xmx2g -Xms512m -Dfile.encoding=UTF-8"
     }
 
     options {
