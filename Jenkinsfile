@@ -1,8 +1,10 @@
 #!/usr/bin/env groovy
+
 def APP_NAME
 def APP_VERSION
 def DOCKER_IMAGE_NAME
 def PROD_BUILD = false
+
 pipeline {
     agent {
         node {
@@ -11,18 +13,25 @@ pipeline {
     }
 
     parameters {
-        gitParameter branch: '',
-                    branchFilter: '.*',
-                    defaultValue: 'origin/main',
-                    description: '', listSize: '0',
-                    name: 'TAG',
-                    quickFilterEnabled: false,
-                    selectedValue: 'DEFAULT',
-                    sortMode: 'DESCENDING_SMART',
-                    tagFilter: '*',
-                    type: 'PT_BRANCH_TAG'
+        gitParameter(
+            branch: '',
+            branchFilter: '.*',
+            defaultValue: 'origin/main',
+            description: '',
+            listSize: '0',
+            name: 'TAG',
+            quickFilterEnabled: false,
+            selectedValue: 'DEFAULT',
+            sortMode: 'DESCENDING_SMART',
+            tagFilter: '*',
+            type: 'PT_BRANCH_TAG'
+        )
 
-        booleanParam defaultValue: false, description: '', name: 'RELEASE'
+        booleanParam(
+            defaultValue: false,
+            description: '',
+            name: 'RELEASE'
+        )
     }
 
     environment {
@@ -31,8 +40,7 @@ pipeline {
         ARTIFACTS = "build/libs/**"
         DOCKER_REGISTRY = "suin4328"
         DOCKERHUB_CREDENTIAL = 'dockerhub-token'
-
-        KAFKA_BROKER = "${params.KAFKA_BROKER}" // Jenkins UI Parameter 등록
+        KAFKA_BROKER = "${params.KAFKA_BROKER}"
 
         JAVA_HOME = "/opt/java/openjdk"
         PATH = "${JAVA_HOME}/bin:${PATH}"
@@ -55,28 +63,30 @@ pipeline {
         stage('Set Version') {
             steps {
                 script {
-                    APP_NAME = sh (
-                            script: "gradle -q getAppName",
-                            returnStdout: true
-                    ).trim()
-                    APP_VERSION = sh (
-                            script: "gradle -q getAppVersion",
-                            returnStdout: true
-                    ).trim()
+                    // NOTE: build.gradle에 getAppName, getAppVersion 태스크가 println 해야 함
+                    APP_NAME = sh(script: "gradle -q getAppName", returnStdout: true).trim()
+                    APP_VERSION = sh(script: "gradle -q getAppVersion", returnStdout: true).trim()
+
+                    if (!APP_NAME) {
+                        error("APP_NAME is empty. Make sure getAppName prints something in build.gradle")
+                    }
+                    if (!APP_VERSION) {
+                        error("APP_VERSION is empty. Make sure getAppVersion prints something in build.gradle")
+                    }
 
                     DOCKER_IMAGE_NAME = "${DOCKER_REGISTRY}/${APP_NAME}:${APP_VERSION}"
 
                     sh "echo IMAGE_NAME is ${APP_NAME}"
                     sh "echo IMAGE_VERSION is ${APP_VERSION}"
                     sh "echo DOCKER_IMAGE_NAME is ${DOCKER_IMAGE_NAME}"
-
                     sh "echo TAG is ${params.TAG}"
-                    if( params.TAG.startsWith('origin') == false && params.TAG.endsWith('/main') == false ) {
-                        if( params.RELEASE == true ) {
-                            DOCKER_IMAGE_VERSION += '-RELEASE'
+
+                    if (!params.TAG.startsWith('origin') && !params.TAG.endsWith('/main')) {
+                        if (params.RELEASE == true) {
+                            DOCKER_IMAGE_NAME += '-RELEASE'
                             PROD_BUILD = true
                         } else {
-                            DOCKER_IMAGE_VERSION += '-TAG'
+                            DOCKER_IMAGE_NAME += '-TAG'
                         }
                     }
                 }
@@ -85,14 +95,14 @@ pipeline {
 
         stage('Build & Test Application') {
             steps {
-                   sh 'export GRADLE_OPTS="-Xmx2g -Dfile.encoding=UTF-8" && gradle clean build'
+                sh 'gradle clean build'
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build "${DOCKER_IMAGE_NAME}"
+                    docker.build("${DOCKER_IMAGE_NAME}")
                 }
             }
         }
