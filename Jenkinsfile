@@ -13,7 +13,7 @@ pipeline {
     parameters {
         gitParameter branch: '',
                     branchFilter: '.*',
-                    defaultValue: 'origin/main',
+                    defaultValue: 'develop',
                     description: '', listSize: '0',
                     name: 'TAG',
                     quickFilterEnabled: false,
