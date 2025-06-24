@@ -55,7 +55,7 @@ public class TokenGenerator {
         String token = Jwts.builder()
                 .issuer("welab")
                 .subject(String.valueOf(userId))
-                .claim("userId", userId)
+                .claim("userId", String.valueOf(userId))
                 .claim("deviceType", deviceType)
                 .claim("tokenType", tokenType)
                 .issuedAt(new Date())
