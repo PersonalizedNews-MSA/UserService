@@ -28,14 +28,14 @@ public class UserAuthController {
     private final RefreshTokenService refreshTokenService;
 
     @Operation(summary = "회원가입", description = "이름, 이메일, 비밀번호를 입력받아 회원가입을 진행합니다.")
-    @PostMapping(value = "/signup")
+    @PostMapping(value = "/auth/signup")
     public ApiResponseDto<String> register(@RequestBody @Valid UserRegisterRequestDto registerDto) {
         userAuthService.registerUser(registerDto);
         return ApiResponseDto.defaultOk();
     }
 
     @Operation(summary = "사용자 로그인", description = "이메일과 비밀번호를 입력받아 JWT 액세스/리프레시 토큰을 반환합니다.")
-    @PostMapping(value = "/login")
+    @PostMapping(value = "/auth/login")
     public ApiResponseDto<TokenDto.AccessToken> login(@RequestBody @Valid UserLoginRequestDto loginDto, HttpServletResponse response , HttpServletRequest request) {
         String deviceInfo = GatewayRequestHeaderUtils.getClientDeviceOrThrowException();
         TokenDto.AccessRefreshToken token = userAuthService.login(loginDto , deviceInfo);

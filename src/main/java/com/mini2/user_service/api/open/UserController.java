@@ -24,7 +24,7 @@ public class UserController {
     private final UserService userService;
 
     @Operation(summary = "이메일 중복 확인", description = "이메일이 이미 존재하는지 확인합니다.")
-    @PostMapping("/email-check")
+    @PostMapping("/auth/email-check")
     public ApiResponseDto<Boolean> checkEmail(@RequestBody @Valid EmailCheckRequestDto emailCheckDto){
         boolean isAvailable = userService.isEmailAvailable(emailCheckDto);
         return ApiResponseDto.createOk(isAvailable);
