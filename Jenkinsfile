@@ -34,7 +34,7 @@ pipeline {
 
         KAFKA_BROKER = "${params.KAFKA_BROKER}" // Jenkins UI Parameter 등록
     }
-₩
+
     options {
         disableConcurrentBuilds()
         buildDiscarder(logRotator(numToKeepStr: "30", artifactNumToKeepStr: "30"))
