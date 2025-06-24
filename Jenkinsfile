@@ -91,14 +91,14 @@ pipeline {
             }
         }
 
+
         stage('Push Docker Image') {
             steps {
                 script {
                     docker.withRegistry("", DOCKERHUB_CREDENTIAL) {
-                        docker.image("${DOCKER_IMAGE_NAME}").push()
+                        sh "docker buildx build --platform linux/amd64,linux/arm64 -t ${DOCKER_IMAGE_NAME} --push ."
                     }
-
-                    sh "docker rmi ${DOCKER_IMAGE_NAME}"
+                    sh "docker rmi -f ${DOCKER_IMAGE_NAME}"
                 }
             }
         }
