@@ -31,8 +31,6 @@ pipeline {
         ARTIFACTS = "build/libs/**"
         DOCKER_REGISTRY = "suin4328"
         DOCKERHUB_CREDENTIAL = 'dockerhub-token'
-
-        KAFKA_BROKER = "${params.KAFKA_BROKER}" // Jenkins UI Parameter 등록
     }
 
     options {
@@ -81,7 +79,7 @@ pipeline {
 
         stage('Build & Test Application') {
             steps {
-                   sh 'export GRADLE_OPTS="-Xmx2g -Dfile.encoding=UTF-8" && gradle clean build'
+                sh "gradle clean build"
             }
         }
 
