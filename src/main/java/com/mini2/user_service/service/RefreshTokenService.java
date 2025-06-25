@@ -75,10 +75,9 @@ public class RefreshTokenService {
 
 
     // 로그아웃
-    public void logout(Long userId, String deviceInfo) {
-        RefreshToken token = refreshTokenRepository.findByUserIdAndDeviceInfo(userId, deviceInfo)
+    public void logout(Long userId) {
+        RefreshToken token = refreshTokenRepository.findByUserId(userId)
                 .orElseThrow(() -> new NotFound("해당 사용자의 토큰이 없습니다."));
-
         token.invalidate();
     }
 

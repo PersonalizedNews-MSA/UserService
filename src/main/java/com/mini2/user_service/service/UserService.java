@@ -47,16 +47,11 @@ public class UserService {
     }
 
     //회원 탈퇴
-    public void withdrawByRequest(String refreshToken ,String deviceInfo) {
-        String userIdStr = tokenGenerator.validateJwtToken(refreshToken);
-
-        if (userIdStr == null) throw new BadParameter("잘못된 토큰입니다.");
-        Long userId = Long.parseLong(userIdStr);
-
+    public void withdrawByRequest(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFound("유저를 찾을 수 없습니다."));
 
         user.markAsDeleted();
-        refreshTokenService.logout(userId, deviceInfo);
+        refreshTokenService.logout(userId);
     }
 }

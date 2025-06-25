@@ -59,14 +59,10 @@ public class UserAuthService {
     }
 
     //로그아웃
-    public void logout(String refreshToken, String deviceInfo) {
-        String userIdStr = tokenGenerator.validateJwtToken(refreshToken);
-        if (userIdStr == null) {
-            throw new BadParameter("유효하지 않은 토큰입니다.");
-        }
-        Long userId = Long.parseLong(userIdStr);
-
-        refreshTokenService.logout(userId, deviceInfo);
+    public void logout(Long userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NotFound("유저를 찾을 수 없습니다."));
+        refreshTokenService.logout(userId);
     }
 
 

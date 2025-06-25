@@ -56,10 +56,9 @@ public class UserAuthController {
 
     @Operation(summary = "로그아웃", description = "리프레시 토큰을 비활성화 하고 쿠키 삭제를 통해 로그아웃을 처리합니다.")
     @PostMapping("/logout")
-    public ApiResponseDto<String> logout(HttpServletRequest request, HttpServletResponse response) {
-        String refreshToken = CookieUtils.extractRefreshToken(request);
-        String deviceInfo = GatewayRequestHeaderUtils.getClientDeviceOrThrowException();
-        userAuthService.logout(refreshToken, deviceInfo);
+    public ApiResponseDto<String> logout(HttpServletResponse response) {
+        Long userId = Long.valueOf(GatewayRequestHeaderUtils.getUserIdOrThrowException());
+        userAuthService.logout(userId);
         CookieUtils.deleteCookie(response,"refreshToken");
         return ApiResponseDto.createOk("로그아웃 되었습니다.");
     }
