@@ -13,7 +13,7 @@ pipeline {
     parameters {
         gitParameter branch: '',
                     branchFilter: '.*',
-                    defaultValue: 'origin/main',
+                    defaultValue: 'develop',
                     description: '', listSize: '0',
                     name: 'TAG',
                     quickFilterEnabled: false,
@@ -26,15 +26,13 @@ pipeline {
     }
 
     environment {
-        GIT_URL = "https://github.com/whl5105/UserService.git"
+        GIT_URL = "https://github.com/PersonalizedNews-MSA/UserService.git"
         GITHUB_CREDENTIAL = "github-token"
         ARTIFACTS = "build/libs/**"
         DOCKER_REGISTRY = "suin4328"
         DOCKERHUB_CREDENTIAL = 'dockerhub-token'
-
-        KAFKA_BROKER = "${params.KAFKA_BROKER}" // Jenkins UI Parameter 등록
     }
-₩
+
     options {
         disableConcurrentBuilds()
         buildDiscarder(logRotator(numToKeepStr: "30", artifactNumToKeepStr: "30"))
@@ -81,7 +79,7 @@ pipeline {
 
         stage('Build & Test Application') {
             steps {
-                   sh 'export GRADLE_OPTS="-Xmx2g -Dfile.encoding=UTF-8" && gradle clean build'
+                sh "gradle clean build"
             }
         }
 
@@ -93,14 +91,14 @@ pipeline {
             }
         }
 
+
         stage('Push Docker Image') {
             steps {
                 script {
                     docker.withRegistry("", DOCKERHUB_CREDENTIAL) {
-                        docker.image("${DOCKER_IMAGE_NAME}").push()
+                        sh "docker buildx build --platform linux/amd64,linux/arm64 -t ${DOCKER_IMAGE_NAME} --push ."
                     }
-
-                    sh "docker rmi ${DOCKER_IMAGE_NAME}"
+                    sh "docker rmi -f ${DOCKER_IMAGE_NAME}"
                 }
             }
         }

@@ -55,7 +55,7 @@ public class TokenGenerator {
         String token = Jwts.builder()
                 .issuer("welab")
                 .subject(String.valueOf(userId))
-                .claim("userId", userId)
+                .claim("userId", String.valueOf(userId))
                 .claim("deviceType", deviceType)
                 .claim("tokenType", tokenType)
                 .issuedAt(new Date())
@@ -111,7 +111,7 @@ public class TokenGenerator {
     //== JWT의 만료 시간(expiration time) 계산 ==
     private int tokenExpiresIn(boolean refreshToken, String deviceType) {
         if(!refreshToken){
-            return 60 * 15;
+            return 60 * 60;
         }
         if(deviceType.equals("MOBILE")){
             return configProperties.getMobileExpiresIn();

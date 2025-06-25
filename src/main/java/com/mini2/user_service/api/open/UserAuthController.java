@@ -28,19 +28,21 @@ public class UserAuthController {
     private final RefreshTokenService refreshTokenService;
 
     @Operation(summary = "회원가입", description = "이름, 이메일, 비밀번호를 입력받아 회원가입을 진행합니다.")
-    @PostMapping(value = "/signup")
-    public ApiResponseDto<String> register(@RequestBody @Valid UserRegisterRequestDto registerDto) {
-        userAuthService.registerUser(registerDto);
-        return ApiResponseDto.defaultOk();
+    @PostMapping(value = "/auth/signup")
+    public ApiResponseDto<TokenDto.AccessToken> register(@RequestBody @Valid UserRegisterRequestDto registerDto , HttpServletResponse response) {
+        String deviceInfo = GatewayRequestHeaderUtils.getClientDeviceOrThrowException();
+        TokenDto.AccessRefreshToken token = userAuthService.registerUser(registerDto , deviceInfo);
+        CookieUtils.addCookie(response, "refreshToken", token.getRefreshToken().getToken(), token.getRefreshToken().getExpiresIn());
+        return ApiResponseDto.createOk(new TokenDto.AccessToken(token.getAccessToken()));
     }
 
     @Operation(summary = "사용자 로그인", description = "이메일과 비밀번호를 입력받아 JWT 액세스/리프레시 토큰을 반환합니다.")
-    @PostMapping(value = "/login")
+    @PostMapping(value = "/auth/login")
     public ApiResponseDto<TokenDto.AccessToken> login(@RequestBody @Valid UserLoginRequestDto loginDto, HttpServletResponse response , HttpServletRequest request) {
         String deviceInfo = GatewayRequestHeaderUtils.getClientDeviceOrThrowException();
         TokenDto.AccessRefreshToken token = userAuthService.login(loginDto , deviceInfo);
-        CookieUtils.addCookie(response, "refreshToken", token.getRefresh().getToken(), token.getRefresh().getExpiresIn());
-        return ApiResponseDto.createOk(new TokenDto.AccessToken(token.getAccess()));
+        CookieUtils.addCookie(response, "refreshToken", token.getRefreshToken().getToken(), token.getRefreshToken().getExpiresIn());
+        return ApiResponseDto.createOk(new TokenDto.AccessToken(token.getAccessToken()));
     }
 
     @Operation(summary = "AccessToken 재발급", description = "만료된 AccessToken을 리프레시 토큰을 통해 재발급합니다.")
@@ -54,10 +56,9 @@ public class UserAuthController {
 
     @Operation(summary = "로그아웃", description = "리프레시 토큰을 비활성화 하고 쿠키 삭제를 통해 로그아웃을 처리합니다.")
     @PostMapping("/logout")
-    public ApiResponseDto<String> logout(HttpServletRequest request, HttpServletResponse response) {
-        String refreshToken = CookieUtils.extractRefreshToken(request);
-        String deviceInfo = GatewayRequestHeaderUtils.getClientDeviceOrThrowException();
-        userAuthService.logout(refreshToken, deviceInfo);
+    public ApiResponseDto<String> logout(HttpServletResponse response) {
+        Long userId = Long.valueOf(GatewayRequestHeaderUtils.getUserIdOrThrowException());
+        userAuthService.logout(userId);
         CookieUtils.deleteCookie(response,"refreshToken");
         return ApiResponseDto.createOk("로그아웃 되었습니다.");
     }

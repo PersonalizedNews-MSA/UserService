@@ -24,7 +24,7 @@ public class UserController {
     private final UserService userService;
 
     @Operation(summary = "이메일 중복 확인", description = "이메일이 이미 존재하는지 확인합니다.")
-    @PostMapping("/email-check")
+    @PostMapping("/auth/email-check")
     public ApiResponseDto<Boolean> checkEmail(@RequestBody @Valid EmailCheckRequestDto emailCheckDto){
         boolean isAvailable = userService.isEmailAvailable(emailCheckDto);
         return ApiResponseDto.createOk(isAvailable);
@@ -50,9 +50,8 @@ public class UserController {
     @Operation(summary = "회원 탈퇴", description = "현재 로그인된 사용자의 계정을 탈퇴 처리합니다.")
     @DeleteMapping("/signout")
     public ApiResponseDto<String> withdraw(HttpServletRequest request, HttpServletResponse response) {
-        String refreshToken = CookieUtils.extractRefreshToken(request);
-        String deviceInfo = GatewayRequestHeaderUtils.getClientDeviceOrThrowException();
-        userService.withdrawByRequest(refreshToken , deviceInfo);
+        Long userId = Long.valueOf(GatewayRequestHeaderUtils.getUserIdOrThrowException());
+        userService.withdrawByRequest(userId);
         CookieUtils.deleteCookie(response,"refreshToken");
         return ApiResponseDto.createOk("탈퇴 되었습니다.");
     }

@@ -26,7 +26,7 @@ public class UserAuthService {
     private final RefreshTokenService refreshTokenService;
 
     //회원가입
-    public void registerUser(UserRegisterRequestDto registerDto) {
+    public TokenDto.AccessRefreshToken registerUser(UserRegisterRequestDto registerDto ,String deviceInfo ) {
         String email = registerDto.getEmail().toLowerCase();
 
         Optional<User> optionalUser = userRepository.findByEmail(email);
@@ -36,6 +36,11 @@ public class UserAuthService {
 
         User user = User.create(email, registerDto.getPassword(), registerDto.getName());
         userRepository.save(user);
+
+        TokenDto.AccessRefreshToken token = tokenGenerator.generateAccessRefreshToken(user.getId(), "WEB");
+        refreshTokenService.saveToken(user.getId(), token.getRefreshToken() , deviceInfo);
+        return token;
+
     }
 
     // 로그인
@@ -49,19 +54,15 @@ public class UserAuthService {
             throw new BadParameter("아이디 또는 비밀번호를 확인하세요.");
         }
         TokenDto.AccessRefreshToken token = tokenGenerator.generateAccessRefreshToken(user.getId(), "WEB");
-        refreshTokenService.saveToken(user.getId(), token.getRefresh() , deviceInfo);
+        refreshTokenService.saveToken(user.getId(), token.getRefreshToken() , deviceInfo);
         return token;
     }
 
     //로그아웃
-    public void logout(String refreshToken, String deviceInfo) {
-        String userIdStr = tokenGenerator.validateJwtToken(refreshToken);
-        if (userIdStr == null) {
-            throw new BadParameter("유효하지 않은 토큰입니다.");
-        }
-        Long userId = Long.parseLong(userIdStr);
-
-        refreshTokenService.logout(userId, deviceInfo);
+    public void logout(Long userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new NotFound("유저를 찾을 수 없습니다."));
+        refreshTokenService.logout(userId);
     }
 
 
