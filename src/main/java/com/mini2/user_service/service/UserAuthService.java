@@ -38,7 +38,7 @@ public class UserAuthService {
         userRepository.save(user);
 
         TokenDto.AccessRefreshToken token = tokenGenerator.generateAccessRefreshToken(user.getId(), "WEB");
-        refreshTokenService.saveToken(user.getId(), token.getRefresh() , deviceInfo);
+        refreshTokenService.saveToken(user.getId(), token.getRefreshToken() , deviceInfo);
         return token;
 
     }
@@ -54,7 +54,7 @@ public class UserAuthService {
             throw new BadParameter("아이디 또는 비밀번호를 확인하세요.");
         }
         TokenDto.AccessRefreshToken token = tokenGenerator.generateAccessRefreshToken(user.getId(), "WEB");
-        refreshTokenService.saveToken(user.getId(), token.getRefresh() , deviceInfo);
+        refreshTokenService.saveToken(user.getId(), token.getRefreshToken() , deviceInfo);
         return token;
     }
 

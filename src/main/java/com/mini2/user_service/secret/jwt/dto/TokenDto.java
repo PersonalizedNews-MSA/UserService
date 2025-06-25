@@ -17,14 +17,14 @@ public class TokenDto {
     @Getter
     @RequiredArgsConstructor
     public static class AccessToken {
-        private final JwtToken access;
+        private final JwtToken accessToken;
     }
 
     @Getter
     @Setter
     @RequiredArgsConstructor
     public static class AccessRefreshToken {
-        private final JwtToken access;
-        private final JwtToken refresh;
+        private final JwtToken accessToken;
+        private final JwtToken refreshToken;
     }
 }
