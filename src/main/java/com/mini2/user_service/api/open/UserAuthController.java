@@ -29,8 +29,10 @@ public class UserAuthController {
 
     @Operation(summary = "회원가입", description = "이름, 이메일, 비밀번호를 입력받아 회원가입을 진행합니다.")
     @PostMapping(value = "/auth/signup")
-    public ApiResponseDto<String> register(@RequestBody @Valid UserRegisterRequestDto registerDto) {
-        userAuthService.registerUser(registerDto);
+    public ApiResponseDto<String> register(@RequestBody @Valid UserRegisterRequestDto registerDto , HttpServletResponse response) {
+        String deviceInfo = GatewayRequestHeaderUtils.getClientDeviceOrThrowException();
+        TokenDto.AccessRefreshToken token = userAuthService.registerUser(registerDto , deviceInfo);
+        CookieUtils.addCookie(response, "refreshToken", token.getRefresh().getToken(), token.getRefresh().getExpiresIn());
         return ApiResponseDto.defaultOk();
     }
 

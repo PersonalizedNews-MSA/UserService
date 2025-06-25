@@ -26,7 +26,7 @@ public class UserAuthService {
     private final RefreshTokenService refreshTokenService;
 
     //회원가입
-    public void registerUser(UserRegisterRequestDto registerDto) {
+    public TokenDto.AccessRefreshToken registerUser(UserRegisterRequestDto registerDto ,String deviceInfo ) {
         String email = registerDto.getEmail().toLowerCase();
 
         Optional<User> optionalUser = userRepository.findByEmail(email);
@@ -36,6 +36,11 @@ public class UserAuthService {
 
         User user = User.create(email, registerDto.getPassword(), registerDto.getName());
         userRepository.save(user);
+
+        TokenDto.AccessRefreshToken token = tokenGenerator.generateAccessRefreshToken(user.getId(), "WEB");
+        refreshTokenService.saveToken(user.getId(), token.getRefresh() , deviceInfo);
+        return token;
+
     }
 
     // 로그인
