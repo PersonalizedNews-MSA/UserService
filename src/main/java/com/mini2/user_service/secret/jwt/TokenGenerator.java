@@ -111,7 +111,7 @@ public class TokenGenerator {
     //== JWT의 만료 시간(expiration time) 계산 ==
     private int tokenExpiresIn(boolean refreshToken, String deviceType) {
         if(!refreshToken){
-            return 60 * 15;
+            return 60 * 60;
         }
         if(deviceType.equals("MOBILE")){
             return configProperties.getMobileExpiresIn();
